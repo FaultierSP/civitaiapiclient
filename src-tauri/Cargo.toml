@@ -1,0 +1,25 @@
+[package]
+name = "civitaiapiclient"
+version = "0.0.1"
+description = "A client for the Civitai API"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.5.2", features = [] }
+
+[dependencies]
+tauri = { version = "1.6.8", features = [ "shell-open"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+confy = "0.6.1"
+reqwest = { version = "0.12.5", features = ["blocking"] }
+tokio = "1.38.0"
+directories = "5.0.1"
+little_exif = "0.3.2"
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]

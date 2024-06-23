@@ -1,0 +1,94 @@
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use serde::{Deserialize, Serialize};
+use reqwest;
+use std::fs::{self, File};
+use std::io::copy;
+use std::path::Path;
+use directories::UserDirs;
+//use little_exif::metadata::Metadata;
+//use little_exif::exif_tag::ExifTag;
+
+#[derive(Serialize,Deserialize)]
+struct Config {
+    api_key: String,
+    api_prefix: String
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            api_key:"".to_string(),
+            api_prefix:"/api/v1/".to_string()
+        }
+    }
+}
+
+fn load_config() -> Result<Config,confy::ConfyError> {
+    confy::load("civitaiapiclient",None)
+}
+
+fn config_to_json() -> Result<String,Box<dyn std::error::Error>> {
+    let config=load_config()?;
+    let json = serde_json::to_string(&config)?;
+    Ok(json)
+}
+
+#[tauri::command]
+fn get_current_config() -> Result<String,String> {    
+    config_to_json().map_err(|e| e.to_string())
+}
+
+fn save_config_from_json(config_json: &str) -> Result<(),Box<dyn std::error::Error>> {
+    let config:Config = serde_json::from_str(config_json)?;
+    confy::store("civitaiapiclient",None,config)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn save_config(config_json: &str) -> Result<(),String> {
+    save_config_from_json(config_json).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn download_image(url: String, author: String, _image_description: String) -> Result<String, String> {
+    let user_dirs = UserDirs::new().ok_or("Could not retrieve user directories.")?;
+    let download_dir=user_dirs.download_dir().ok_or("Could not retrieve the download directory.")?;
+    let folder_name=format!("{}/Civitai/{}",download_dir.to_str().unwrap(),author);
+
+    if !Path::new(&folder_name).exists() {
+        fs::create_dir_all(folder_name.clone()).map_err(|e| e.to_string())?;
+    }
+
+    let image_name=url.split('/').last().ok_or("Invalid image URL");
+    let image_path_string=format!("{}/{}",folder_name,image_name.unwrap());
+    let image_path = Path::new(&image_path_string);
+
+    if !image_path.exists() {
+        let mut response = reqwest::blocking::get(url).map_err(|e| e.to_string())?;
+        let mut file = File::create(image_path).map_err(|e| e.to_string())?;
+        copy(&mut response, &mut file).map_err(|e| e.to_string())?;
+    }
+
+    //Trying to figure out a problem on this one.
+    //let mut metadata = Metadata::new_from_path(image_path).map_err(|e| e.to_string())?;
+    //metadata.set_tag(ExifTag::ImageDescription(image_description));
+    //metadata.set_tag(ExifTag::UserComment(image_description.into()));
+    //metadata.set_tag(ExifTag::ImageDescription("test".to_string()));
+    //metadata.write_to_file(&image_path).map_err(|e| e.to_string())?;
+
+    Ok ("k".into())
+}
+
+fn main() {
+    //So, one day webkit decides to ship an update that breaks the app on some configurations.
+    //Hope to remove these env declarations soon, as they will be marked unsafe on future versions of rust.
+    std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![get_current_config,save_config,download_image])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}

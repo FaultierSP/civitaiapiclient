@@ -9,18 +9,27 @@ use std::path::Path;
 use directories::UserDirs;
 use little_exif::metadata::Metadata;
 use little_exif::exif_tag::ExifTag;
+//use tauri::api::dialog;
 
 #[derive(Serialize,Deserialize)]
 struct Config {
     api_key: String,
-    api_prefix: String
+    api_prefix: String,
+    download_dir: Option<String>
 }
 
 impl Default for Config {
     fn default() -> Self {
+        // Attempt to get the user's download directory
+        let download_dir = match UserDirs::new() {
+            Some(user_dirs) => user_dirs.download_dir().map(|path| path.to_str().unwrap_or_default().to_string()),
+            None => None,
+        };
+
         Config {
             api_key:"".to_string(),
-            api_prefix:"/api/v1/".to_string()
+            api_prefix:"/api/v1/".to_string(),
+            download_dir: download_dir,
         }
     }
 }
@@ -53,9 +62,13 @@ fn save_config(config_json: &str) -> Result<(),String> {
 
 #[tauri::command]
 fn download_image(url: String, author: String, image_description: String) -> Result<String, String> {
-    let user_dirs = UserDirs::new().ok_or("Could not retrieve user directories.")?;
+    /*let user_dirs = UserDirs::new().ok_or("Could not retrieve user directories.")?;
     let download_dir=user_dirs.download_dir().ok_or("Could not retrieve the download directory.")?;
-    let folder_name=format!("{}/Civitai/{}",download_dir.to_str().unwrap(),author);
+    */
+    let config = load_config().map_err(|e| e.to_string())?;
+    let download_dir = config.download_dir.unwrap();
+
+    let folder_name=format!("{}/Civitai/{}",download_dir,author);
 
     if !Path::new(&folder_name).exists() {
         fs::create_dir_all(folder_name.clone()).map_err(|e| e.to_string())?;

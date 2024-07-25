@@ -3,9 +3,9 @@
 A basic API client for viewing and downloading images in batches.
 The app puts all the downloaded images in your systems "Downloads" folder and writes the generation data (models used, prompts etc.) in the EXIF tag.
 ## Installation
-If your system already has WebView2 installed you can try to run the .exe or Linux binary directly. If it doesn't work, use the installers, they should take care of it. Alternatively you can run the AppImage provided, it includes everything.
+If your system already has WebView2 installed you can try to run the .exe or Linux binary directly. If it doesn't work, use the installers (.msi or setup.exe for Windows, .deb or .rpm for Linux), they should take care of it.
 
-Note that this application uses [Confy](https://crates.io/crates/confy) crate to store configuration. It uses your system's default configuration folder (`$HOME/.config` on Linux or `{FOLDERID_RoamingAppData}` on Windows) to store your API key and prefix. You may want to remove the `civitaiapiclient` directory from these locations when you're done using the app and want to be sneaky about it. :)
+Note that this application uses [Confy](https://crates.io/crates/confy) crate to store configuration. It uses your system's default configuration folder (`$HOME/.config` on Linux or `{FOLDERID_RoamingAppData}` on Windows) to store your API key, prefix, and other settings. You may want to remove the `civitaiapiclient` directory from these locations when you're done using the app and want to be sneaky about it. :)
 ## Building the app
 [Here](https://tauri.app/v1/guides/getting-started/prerequisites) is the current doc on how to build a Tauri app. I've had some problems with the ```libayatana-appindicator3-dev``` packet on Debian, but coult install it from backports. Your npm installation shout also include the Tauri CLI tools, they can be installed by running ```npm install @tauri-apps/cli```
 

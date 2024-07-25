@@ -139,8 +139,10 @@ const Images = (props) => {
     const [imagesTableData,setImagesTableData]=useState([]);
     const [selectedTableRows, setSelectedTableRows] = useState([]);
     const [downloadButtonDisabled,setDownloadButtonDisabled]=useState(true);
+    const [loadMoreButtonDisabled,setLoadMoreButtonDisabled]=useState(true);
+    const [loadMoreAPIURL,setLoadMoreAPIURL]=useState('');
+    const [loadMoreButtonAwaiting,setLoadMoreButtonAwaiting]=useState(false);
     const [downloadProgressModalOpen,setDownloadProgressModalOpen]=useState(false);
-    const [progressPercentage,setProgressPercentage]=useState(0);
 
     const rowSelection = {
         onChange: (selectedRowKeys,selectedRows) => {
@@ -201,11 +203,15 @@ const Images = (props) => {
             }            
         }
 
-        //console.log(data);
-
         axios.get('https://civitai.com'+api_prefix+'images',{params:data,headers:api_config})
             .then((response) => {
-                //console.log(response.data.items[0]);
+                if (response.data.metadata.nextPage) {
+                    setLoadMoreAPIURL(response.data.metadata.nextPage);
+                    setLoadMoreButtonDisabled(false);
+                }
+                else {
+                    setLoadMoreButtonDisabled(true);
+                }
                 setImagesTableData(response.data.items);
                 setDownloadButtonDisabled(true);
                 //setSelectedRowKeys([]);
@@ -230,6 +236,7 @@ const Images = (props) => {
         formHandle.resetFields();
         setImagesTableData([]);
         setDownloadButtonDisabled(true);
+        setLoadMoreButtonDisabled(true);
         setSelectedTableRows([]);
     }
 
@@ -239,6 +246,31 @@ const Images = (props) => {
 
     const closeDownloadProgressModal = () => {
         setDownloadProgressModalOpen(false);
+    }
+
+    const loadMoreImages = () => {
+        setLoadMoreButtonAwaiting(true);
+
+        axios.get(loadMoreAPIURL,{headers:api_config})
+            .then((response)=>{
+                setImagesTableData((imagesTableData)=>[...imagesTableData,...response.data.items]);
+
+                if (response.data.metadata.nextPage) {
+                    setLoadMoreAPIURL(response.data.metadata.nextPage);
+                    setLoadMoreButtonDisabled(false);
+                }
+                else {
+                    setLoadMoreButtonDisabled(true);
+                }
+            })
+            .catch((error) => {
+                if(typeof error!=undefined) {
+                    props.showErrorMessage(error.response.data.error);
+                }
+            })
+            .finally(()=> {
+                setLoadMoreButtonAwaiting(false);
+            });
     }
 
     return(
@@ -274,7 +306,7 @@ const Images = (props) => {
                     <Form.Item label="Period" name="period">
                         <Select options={periodSelectOptions}/>
                     </Form.Item>
-                    <Form.Item label="Sort by" name="sort">
+                    <Form.Item label="Sort by" name="sort" style={{width:200}}>
                         <Select options={sortBySelectOptions}/>
                     </Form.Item>
                 </Flex>
@@ -296,8 +328,9 @@ const Images = (props) => {
                 </Flex>
                 <Flex gap="small">
                     <Button onClick={resetFields}>Clear</Button>
-                    <Button onClick={downloadSelectedImages} disabled={downloadButtonDisabled}>Download selected</Button>
                     <Button htmlType="submit" type="primary" loading={awaitingResponse}>Search</Button>
+                    <Button onClick={downloadSelectedImages} disabled={downloadButtonDisabled}>Download selected</Button>
+                    <Button onClick={loadMoreImages} disabled={loadMoreButtonDisabled} loading={loadMoreButtonAwaiting}>Load more</Button>
                 </Flex>
             </Form>
             <Divider orientation="left">Found images</Divider>

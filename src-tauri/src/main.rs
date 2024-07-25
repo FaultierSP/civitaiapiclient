@@ -7,8 +7,8 @@ use std::fs::{self, File};
 use std::io::copy;
 use std::path::Path;
 use directories::UserDirs;
-//use little_exif::metadata::Metadata;
-//use little_exif::exif_tag::ExifTag;
+use little_exif::metadata::Metadata;
+use little_exif::exif_tag::ExifTag;
 
 #[derive(Serialize,Deserialize)]
 struct Config {
@@ -52,7 +52,7 @@ fn save_config(config_json: &str) -> Result<(),String> {
 }
 
 #[tauri::command]
-fn download_image(url: String, author: String, _image_description: String) -> Result<String, String> {
+fn download_image(url: String, author: String, image_description: String) -> Result<String, String> {
     let user_dirs = UserDirs::new().ok_or("Could not retrieve user directories.")?;
     let download_dir=user_dirs.download_dir().ok_or("Could not retrieve the download directory.")?;
     let folder_name=format!("{}/Civitai/{}",download_dir.to_str().unwrap(),author);
@@ -71,12 +71,10 @@ fn download_image(url: String, author: String, _image_description: String) -> Re
         copy(&mut response, &mut file).map_err(|e| e.to_string())?;
     }
 
-    //Trying to figure out a problem on this one.
-    //let mut metadata = Metadata::new_from_path(image_path).map_err(|e| e.to_string())?;
-    //metadata.set_tag(ExifTag::ImageDescription(image_description));
-    //metadata.set_tag(ExifTag::UserComment(image_description.into()));
-    //metadata.set_tag(ExifTag::ImageDescription("test".to_string()));
-    //metadata.write_to_file(&image_path).map_err(|e| e.to_string())?;
+    //Adding the generation data to the EXIF tag.
+    let mut metadata = Metadata::new_from_path(image_path).map_err(|e| e.to_string())?;
+    metadata.set_tag(ExifTag::ImageDescription(image_description));
+    metadata.write_to_file(&image_path).map_err(|e| e.to_string())?;
 
     Ok ("k".into())
 }

@@ -1,7 +1,11 @@
 # A client for the Civitai API
 ![Screenshot](screenshots/1-min.png)
 A basic API client for viewing and downloading images in batches.
-The app puts all the downloaded images in your systems "Downloads" folder.
+The app puts all the downloaded images in your systems "Downloads" folder and writes the generation data (models used, prompts etc.) in the EXIF tag.
+## Installation
+If your system already has WebView2 installed you can try to run the .exe or Linux binary directly. If it doesn't work, use the installers, they should take care of it. Alternatively you can run the AppImage provided, it includes everything.
+
+Note that this application uses [Confy](https://crates.io/crates/confy) crate to store configuration. It uses your system's default configuration folder (`$HOME/.config` on Linux or `{FOLDERID_RoamingAppData}` on Windows) to store your API key and prefix. You may want to remove the `civitaiapiclient` directory from these locations when you're done using the app and want to be sneaky about it. :)
 ## Building the app
 [Here](https://tauri.app/v1/guides/getting-started/prerequisites) is the current doc on how to build a Tauri app. I've had some problems with the ```libayatana-appindicator3-dev``` packet on Debian, but coult install it from backports. Your npm installation shout also include the Tauri CLI tools, they can be installed by running ```npm install @tauri-apps/cli```
 
@@ -12,7 +16,5 @@ npm run tauri build
 ## Credits
 ### Civitai API
 [API Reference](https://github.com/civitai/civitai/wiki/REST-API-Reference)
-### Tauri
-This project uses [Tauri](https://tauri.app/) to create a cross-platform application.
-### ReactJS
-This project uses [React](https://reactjs.org/) to create the user interface.
+### Building blocks
+This project uses [Tauri](https://tauri.app/) to create a cross-platform application and [React](https://reactjs.org/) to create the user interface. [Confy](https://crates.io/crates/confy) is used to store configuration and [little_exif](https://crates.io/crates/little_exif) to write the generation data into the file.

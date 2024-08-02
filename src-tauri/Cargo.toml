@@ -1,8 +1,9 @@
 [package]
 name = "civitaiapiclient"
-version = "0.0.1"
+version = "0.0.3"
 description = "A client for the Civitai API"
-authors = ["you"]
+authors = ["FaultierSP"]
+repository = "https://github.com/FaultierSP/civitaiapiclient"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -16,7 +17,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 confy = "0.6.1"
 reqwest = { version = "0.12.5", features = ["blocking"] }
-tokio = "1.39.1"
+tokio = "1.39.2"
 directories = "5.0.1"
 little_exif = "0.3.3"
 

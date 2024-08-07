@@ -91,10 +91,6 @@ const SearchCreatorsOfImages = (props) => {
             .catch(()=> setSearchButtonDisabled(true) );
     },[formHandle,formValues]);
 
-    useEffect(()=>{
-        formHandle.setFieldValue("username","faultiersp");
-    },[]);
-
     return (
         <Flex vertical>
         <Form

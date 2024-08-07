@@ -18,16 +18,23 @@ function App() {
   const [messageApi,contextHolder]=message.useMessage();
 
   //UI
-  const showSuccessMessage = (messageText) => {
+  function showSuccessMessage(messageText) {
     messageApi.open({
       type:"success",
       content:messageText,
     });
   }
 
-  const showErrorMessage = (messageText) => {
+  function showErrorMessage(messageText) {
     messageApi.open({
       type:"error",
+      content:messageText,
+    });
+  }
+
+  function showWarningMessage(messageText) {
+    messageApi.open({
+      type:"warning",
       content:messageText,
     });
   }
@@ -49,7 +56,12 @@ function App() {
       {
         label:'Images',
         key:'images',
-        children:(<Images globalSettings={globalSettings} showSuccessMessage={showSuccessMessage} showErrorMessage={showErrorMessage}/>)
+        children:(<Images 
+          globalSettings={globalSettings}
+          showSuccessMessage={showSuccessMessage}
+          showErrorMessage={showErrorMessage}
+          showWarningMessage={showWarningMessage}
+        />)
       },
       {
         label:"Download all creator's images",

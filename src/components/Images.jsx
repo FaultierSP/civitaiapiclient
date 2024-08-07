@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/tauri";
 import { useState } from "react";
 import { Blurhash } from "react-blurhash";
 import axios from "axios";
@@ -287,6 +288,7 @@ const Images = (props) => {
                     downloadProgressModalOpen={downloadProgressModalOpen}
                     closeDownloadProgressModal={closeDownloadProgressModal}
                     showSuccessMessage={props.showSuccessMessage}
+                    showWarningMessage={props.showWarningMessage}
                     showErrorMessage={props.showErrorMessage}
                     />
             </Modal>

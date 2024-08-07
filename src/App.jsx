@@ -5,6 +5,7 @@ import "./App.css";
 import { Tabs, message } from "antd";
 
 import Creators from "./components/Creators";
+import CreatorsImagesDownloader from "./components/CreatorsImagesDownloader";
 import SettingsForm from "./components/SettingsForm";
 import Images from "./components/Images";
 import EmptyPage from "./components/EmptyPage";
@@ -38,7 +39,8 @@ function App() {
         setGlobalSettings(JSON.parse(settingsData));
       })
       .catch((error) =>  {
-        console.log("Couldn't load configuration: ", error);
+        //console.log("Couldn't load configuration: ", error);
+        showErrorMessage("Couldn't load configuration: " + error);
       });
   }
 
@@ -48,6 +50,11 @@ function App() {
         label:'Images',
         key:'images',
         children:(<Images globalSettings={globalSettings} showSuccessMessage={showSuccessMessage} showErrorMessage={showErrorMessage}/>)
+      },
+      {
+        label:"Download all creator's images",
+        key:'download_all',
+        children:(<CreatorsImagesDownloader globalSettings={globalSettings} showSuccessMessage={showSuccessMessage} showErrorMessage={showErrorMessage}/>),
       },
       {
         label:'Creators of models',
@@ -73,7 +80,8 @@ function App() {
     invoke("save_config", {configJson} )
       .then(showSuccessMessage("Configuration saved."))
       .catch((error) => {
-        console.error("Failed to save configuration: ", error);
+        //console.error("Failed to save configuration: ", error);
+        showErrorMessage("Failed to save configuration: " + error);
       });
   }
 

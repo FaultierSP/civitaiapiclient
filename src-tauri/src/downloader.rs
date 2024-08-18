@@ -10,7 +10,7 @@ use little_exif::exif_tag::ExifTag;
 use serde::{Deserialize, Serialize};
 use once_cell::sync::Lazy;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex,RwLock};
 
 //Metadata definitions and static
 #[allow(non_snake_case)]
@@ -62,7 +62,7 @@ struct MetadataCollection {
 
 static IMAGES_TO_DOWNLOAD: Lazy<Arc<Mutex<Vec<MetadataItem>>>> = Lazy::new(|| Arc::new(Mutex::new(vec![])));
 static AMOUNT_OF_IMAGES_TO_DOWNLOAD : Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
-static CANCEL_GETTING_METADATA_FLAG: Lazy<Arc<Mutex<bool>>> = Lazy::new(|| Arc::new(Mutex::new(false)));
+static CANCEL_GETTING_METADATA_FLAG: Lazy<Arc<RwLock<bool>>> = Lazy::new(|| Arc::new(RwLock::new(false)));
 static CANCEL_DOWNLOADING_IMAGES_STORED_IN_METADATA_FLAG: Lazy<Arc<Mutex<bool>>> = Lazy::new(|| Arc::new(Mutex::new(false)));
 
 
@@ -136,7 +136,7 @@ pub async fn get_metadata(username: &str,window: tauri::Window) -> Result<String
     api_headers.insert(reqwest::header::AUTHORIZATION, format!("Bearer {}",config_guard.api_key).parse().unwrap());
 
     let mut api_params = HashMap::new();
-    //api_params.insert("limit","42"); //for testing purposes
+    api_params.insert("limit","200"); //for testing purposes
     api_params.insert("username",username);
     api_params.insert("nsfw","X"); //weird undocumented behavior. It marks highest possible level.
 
@@ -147,7 +147,7 @@ pub async fn get_metadata(username: &str,window: tauri::Window) -> Result<String
 
     while let Some(ref next_page_url) = next_page {
         //Check if canceled
-        let cancel_flag = CANCEL_GETTING_METADATA_FLAG.lock().await;
+        let cancel_flag = CANCEL_GETTING_METADATA_FLAG.read().await;
         if *cancel_flag {
             return Ok("Canceled from frontend.".into());
         }
@@ -182,7 +182,11 @@ pub async fn get_metadata(username: &str,window: tauri::Window) -> Result<String
             items_fetched += 1;
         }
 
-        let _ = window.emit("update_fetched_metadata_items",items_fetched);
+        let cancel_flag = CANCEL_GETTING_METADATA_FLAG.read().await;
+        if !*cancel_flag {
+            let _ = window.emit("update_fetched_metadata_items",items_fetched);
+        }
+        drop(cancel_flag);
     }
 
     let mut amount_of_images_to_download_guard = AMOUNT_OF_IMAGES_TO_DOWNLOAD.lock().await;
@@ -227,14 +231,14 @@ async fn clear_metadata_of_images_to_download() {
     previous_metadata_guard.clear();
     drop(previous_metadata_guard);
 
-    let mut cancel_getting_metadata_flag_guard = CANCEL_GETTING_METADATA_FLAG.lock().await;
+    let mut cancel_getting_metadata_flag_guard = CANCEL_GETTING_METADATA_FLAG.write().await;
     *cancel_getting_metadata_flag_guard = false;
     drop(cancel_getting_metadata_flag_guard);
 }
 
 #[tauri::command]
 pub async fn cancel_getting_metadata() -> Result<String,String> {
-    let mut cancel_getting_metadata_flag_guard = CANCEL_GETTING_METADATA_FLAG.lock().await;
+    let mut cancel_getting_metadata_flag_guard = CANCEL_GETTING_METADATA_FLAG.write().await;
     *cancel_getting_metadata_flag_guard = true;
 
     Ok("Cancellation requested".into())

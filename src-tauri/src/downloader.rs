@@ -16,13 +16,20 @@ use tokio::sync::Mutex;
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 struct MetaOfImage {
-    //seed: Option<u64>,
-    //steps: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    seed: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    steps: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     prompt: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     negativePrompt: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     sampler: Option<String>,
-    //cfgScale: Option<u16>,
-    //clipSkip: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    cfgScale: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    clipSkip: Option<f32>,
 }
 
 #[allow(non_snake_case)]
@@ -31,22 +38,9 @@ struct MetadataItem {
     id: u32,
     url: String,
     username: String,
-    #[serde(default = "default_post_id")]
     postId: u32,
-    #[serde(default = "default_meta")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     meta: Option<MetaOfImage>,
-}
-
-fn default_post_id() -> u32 {
-    0
-}
-
-fn default_meta() -> Option<MetaOfImage> {
-    Some(MetaOfImage {
-        prompt:Some("Prompt was not provided by Civitai API.".to_string()),
-        negativePrompt:Some("Negative prompt was not provided by Civitai API.".to_string()),
-        sampler:Some("Sampler was not provided by Civitai API.".to_string()),
-    })
 }
 
 #[allow(non_snake_case)]

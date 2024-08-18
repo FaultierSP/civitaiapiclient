@@ -9,7 +9,7 @@ I'm not quite sure why there is a possibility of providing an API key, the resul
 
 Note that this application uses [Confy](https://crates.io/crates/confy) crate to store configuration. It uses your system's default configuration folder (`$HOME/.config` on Linux or `{FOLDERID_RoamingAppData}` on Windows) to store your API key, prefix, and other settings. You may want to remove the `civitaiapiclient` directory from these locations when you're done using the app and want to be sneaky about it. :)
 ## Building the app
-[Here](https://tauri.app/v1/guides/getting-started/prerequisites) is the current doc on how to build a Tauri app. I've had some problems with the ```libayatana-appindicator3-dev``` packet on Debian, but coult install it from backports. Your npm installation shout also include the Tauri CLI tools, they can be installed by running ```npm install @tauri-apps/cli```
+[Here](https://tauri.app/v1/guides/getting-started/prerequisites) is the current doc on how to build a Tauri app. I've had some problems with the ```libayatana-appindicator3-dev``` packet on Debian, but coult install it from backports. Your npm installation should also include the Tauri CLI tools, they can be installed by running ```npm install @tauri-apps/cli```
 
 Then you can simply build it by
 ~~~

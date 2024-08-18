@@ -1,6 +1,11 @@
+## [0.0.4] - 18.08.2024
+- Changed the way serializer handles missing fields (issue #4).
+- Small tweaks.
+- Updated dependencies.
+
 ## [0.0.3] - 07.08.2024
 ### Added
-- The function to download all images of a creator (issue #3)
+- The function to download all images of a creator (issue #3).
 ### Other
 - Refactoring
 - Updated dependencies

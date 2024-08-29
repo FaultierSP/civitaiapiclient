@@ -9,6 +9,8 @@ use once_cell::sync::Lazy;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+const NAME_OF_CONFIG_FILE: &str = "configuration.toml";
+
 #[derive(Serialize,Deserialize,Clone,Debug)]
 struct Config {
     api_key: String,
@@ -33,7 +35,8 @@ impl Default for Config {
 }
 
 static CONFIG: Lazy<Arc<RwLock<Config>>> = Lazy::new(|| {
-    let config = confy::load("civitaiapiclient",None).unwrap_or_default();
+    //let config = confy::load("civitaiapiclient",None).unwrap_or_default();
+    let config = confy::load_path(NAME_OF_CONFIG_FILE).unwrap_or_default();
     return Arc::new(RwLock::new(config));
 });
 
@@ -53,7 +56,8 @@ async fn save_config_from_json(config_json: &str) -> Result<(),String> {
     *config_guard = config.clone();
     drop(config_guard);
 
-    let result = confy::store("civitaiapiclient",None,config);
+    //let result = confy::store("civitaiapiclient",None,config);
+    let result = confy::store_path(NAME_OF_CONFIG_FILE,config);
     
     match result {
         Ok(_) => return Ok(()),

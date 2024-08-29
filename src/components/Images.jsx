@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Blurhash } from "react-blurhash";
-import axios from "axios";
+
+import { fetch, ResponseType } from "@tauri-apps/api/http";
 import {
     Flex, Divider, Table, Image, Modal, Tooltip,
     Form, Input, InputNumber, Select, Button,
@@ -203,7 +204,15 @@ const Images = (props) => {
             }            
         }
 
-        axios.get('https://civitai.com'+api_prefix+'images',{params:data,headers:api_config})
+        console.log(api_config);
+        console.log(data);
+
+        fetch('https://civitai.com'+api_prefix+'images',{
+            method:'GET',
+            query:data,
+            responseType:ResponseType.JSON,
+            headers:api_config
+        })
             .then((response) => {
                 if (response.data.metadata.nextPage) {
                     setLoadMoreAPIURL(response.data.metadata.nextPage);
@@ -251,7 +260,7 @@ const Images = (props) => {
     const loadMoreImages = () => {
         setLoadMoreButtonAwaiting(true);
 
-        axios.get(loadMoreAPIURL,{headers:api_config})
+        fetch(loadMoreAPIURL,{headers:api_config})
             .then((response)=>{
                 setImagesTableData((imagesTableData)=>[...imagesTableData,...response.data.items]);
 
@@ -330,7 +339,7 @@ const Images = (props) => {
                 <Flex gap="small">
                     <Button onClick={resetFields}>Clear</Button>
                     <Button htmlType="submit" type="primary" loading={awaitingResponse}>Search</Button>
-                    <Button onClick={downloadSelectedImages} disabled={downloadButtonDisabled}>Download selected</Button>
+                    <Button onClick={downloadSelectedImages} disabled={downloadButtonDisabled}>Download selected ({selectedTableRows.length})</Button>
                     <Button onClick={loadMoreImages} disabled={loadMoreButtonDisabled} loading={loadMoreButtonAwaiting}>Load more</Button>
                 </Flex>
             </Form>
@@ -343,6 +352,10 @@ const Images = (props) => {
                     scroll={{y:'calc(50vh)'}}
                     rowKey='id'
                     rowSelection={rowSelection}
+                    pagination={{
+                        showSizeChanger:true,
+                        pageSizeOptions:['10','20','50','100','200'],
+                    }}
                 />
             </Image.PreviewGroup>
         </Flex>

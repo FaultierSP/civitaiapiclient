@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { fetch, ResponseType } from "@tauri-apps/api/http";
 
 import { Flex, Space, Form, Input, Button, Result } from "antd";
 import { SearchOutlined, ArrowRightOutlined } from "@ant-design/icons";
@@ -31,58 +31,61 @@ const SearchCreatorsOfImages = (props) => {
         const data = {
             //limit:1, //for test purposes
             username: formHandle.getFieldValue("username"),
+            period: "AllTime",
+            sort: "Newest",
             nsfw: 'X', //weird undocumented behavior
         };
 
-        axios.get('https://civitai.com/'+api_prefix+'images',{params:data,headers:api_config})
-            .then((response) => {
-                if(response.data.items.length == 0 ) {
-                    setResultTitle("Couldn't find any images by this creator.");
-                    setResultSubTitle(null);
-                    setResultStatus("warning");
-                    setResultButtons(null);
-                    setResultVisible(true);
-                }
-                else {
-                    let message = "Creator " + response.data.items[0].username + " has "+response.data.items.length;
-
-                    if (response.data.metadata.nextPage) {
-                        message += "+";
-                    }
-
-                    message += " images."
-
-                    setResultTitle(message);
-                    setResultSubTitle("We can fetch metadata now.");
-                    setResultStatus("success");
-                    setResultButtons(<Button
-                                        icon={<ArrowRightOutlined/>}
-                                        onClick={() => props.fetchMetadataInParent(response.data.items[0].username)}>Go
-                                    </Button>);
-                    setResultVisible(true);
-                }
-            })
-            .catch((error) => {
-                setResultTitle(error.message);
-                
-                if(error.response.data.error) {
-                    setResultSubTitle(error.response.data.error);
-                }
-                else {
-                    setResultSubTitle(null);
-                }
-
-                setResultStatus("error");
+        fetch('https://civitai.com/'+api_prefix+'images', {
+            method: 'GET',
+            query: data,
+            responseType: ResponseType.JSON,
+            headers: api_config,
+        })
+        .then((response) => {
+            if(response.data.items.length == 0 ) {
+                setResultTitle("Couldn't find any images by this creator.");
+                setResultSubTitle(null);
+                setResultStatus("warning");
                 setResultButtons(null);
                 setResultVisible(true);
-            })
-            .finally(() => {
-                setAwaitingAPIResponse(false);
-            });
-    }
+            }
+            else {
+                let message = "Creator " + response.data.items[0].username + " has "+response.data.items.length;
 
-    function goFetchMetadata() {
+                if (response.data.metadata.nextPage) {
+                    message += "+";
+                }
 
+                message += " images."
+
+                setResultTitle(message);
+                setResultSubTitle("We can fetch metadata now.");
+                setResultStatus("success");
+                setResultButtons(<Button
+                                    icon={<ArrowRightOutlined/>}
+                                    onClick={() => props.fetchMetadataInParent(response.data.items[0].username)}>Go
+                                </Button>);
+                setResultVisible(true);
+            }
+        })
+        .catch((error) => {
+            setResultTitle(error.message);
+            
+            if(error.response.data.error) {
+                setResultSubTitle(error.response.data.error);
+            }
+            else {
+                setResultSubTitle(null);
+            }
+
+            setResultStatus("error");
+            setResultButtons(null);
+            setResultVisible(true);
+        })
+        .finally(() => {
+            setAwaitingAPIResponse(false);
+        });
     }
 
     useEffect(()=>{

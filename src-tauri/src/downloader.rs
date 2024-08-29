@@ -16,20 +16,34 @@ use tokio::sync::{Mutex,RwLock};
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 struct MetaOfImage {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    seed: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    steps: Option<f32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    prompt: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    negativePrompt: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    sampler: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    cfgScale: Option<f32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    clipSkip: Option<f32>,
+    #[serde(default)]
+    seed: u64,
+    #[serde(default)]
+    steps: f32,
+    #[serde(default)]
+    prompt: String,
+    #[serde(default)]
+    negativePrompt: String,
+    #[serde(default)]
+    sampler: String,
+    #[serde(default)]
+    cfgScale: f32,
+    #[serde(default)]
+    clipSkip: f32,
+}
+
+impl Default for MetaOfImage {
+    fn default() -> Self {
+        MetaOfImage {
+            seed: 0,
+            steps: 0.0,
+            prompt: "not provided".into(),
+            negativePrompt: "not provided".into(),
+            sampler: "not provided".into(),
+            cfgScale: 0.0,
+            clipSkip: 0.0,
+        }
+    }
 }
 
 #[allow(non_snake_case)]
@@ -38,9 +52,22 @@ struct MetadataItem {
     id: u32,
     url: String,
     username: String,
+    #[serde(default)]
     postId: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     meta: Option<MetaOfImage>,
+}
+
+impl Default for MetadataItem {
+    fn default() -> Self {
+        MetadataItem {
+            id: 0,
+            url: "".into(),
+            username: "".into(),
+            postId: 0,
+            meta: None,
+        }
+    }
 }
 
 #[allow(non_snake_case)]
@@ -136,9 +163,11 @@ pub async fn get_metadata(username: &str,window: tauri::Window) -> Result<String
     api_headers.insert(reqwest::header::AUTHORIZATION, format!("Bearer {}",config_guard.api_key).parse().unwrap());
 
     let mut api_params = HashMap::new();
-    api_params.insert("limit","200"); //for testing purposes
+    api_params.insert("limit","200");
     api_params.insert("username",username);
-    api_params.insert("nsfw","X"); //weird undocumented behavior. It marks highest possible level.
+    api_params.insert("period","AllTime");
+    api_params.insert("sort","Newest"); // Weird undocumented behavior. It doesn't return all images if this parameter is not set.
+    api_params.insert("nsfw","X"); // Another weird undocumented behavior. It marks highest possible level.
 
     let api_url = format!("https://civitai.com/{}/images",config_guard.api_prefix);
 

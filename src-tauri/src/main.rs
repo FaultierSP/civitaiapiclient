@@ -70,7 +70,6 @@ async fn save_config(config_json: &str) -> Result<(),String> {
     save_config_from_json(config_json).await
 }
 
-
 fn main() {
     //So, one day webkit decides to ship an update that breaks the app on some configurations.
     //Hope to remove these env declarations soon, as they will be marked unsafe on future versions of rust.

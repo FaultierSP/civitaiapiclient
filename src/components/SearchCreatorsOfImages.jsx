@@ -98,6 +98,7 @@ const SearchCreatorsOfImages = (props) => {
         <Flex vertical>
         <Form
                 form={formHandle}
+                onFinish={getFirstBatchOfImages}
             >
         <Space.Compact>
             <Form.Item name="username" rules={[{ required:true }]} help={null}>

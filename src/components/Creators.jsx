@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 
 import {
     Flex, Divider, Space, Table, 
@@ -38,6 +37,8 @@ const Creators = (props) => {
         }
 
         setSearchButtonLoading(true);
+        /*
+        Change to fetch
         axios.get('https://civitai.com'+api_prefix+'creators',{params:params,headers:api_config})
             .then((response) => {
                 if(response.data.metadata.totalItems>0) {
@@ -55,6 +56,7 @@ const Creators = (props) => {
             .finally(()=>{
                 setSearchButtonLoading(false);
             });
+        */
     }
 
     useEffect(()=>{

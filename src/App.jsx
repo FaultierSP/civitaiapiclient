@@ -4,11 +4,12 @@ import "./App.css";
 
 import { Tabs, message } from "antd";
 
-import Creators from "./components/Creators";
+//import Creators from "./components/Creators";
 import CreatorsImagesDownloader from "./components/CreatorsImagesDownloader";
 import SettingsForm from "./components/SettingsForm";
 import Images from "./components/Images";
-import EmptyPage from "./components/EmptyPage";
+//import EmptyPage from "./components/EmptyPage";
+import About from "./components/About";
 
 function App() {
   //Variables
@@ -68,6 +69,7 @@ function App() {
         key:'download_all',
         children:(<CreatorsImagesDownloader globalSettings={globalSettings} showSuccessMessage={showSuccessMessage} showErrorMessage={showErrorMessage}/>),
       },
+      /*
       {
         label:'Creators of models',
         key:'creator',
@@ -78,10 +80,16 @@ function App() {
         key:'models',
         children:(<EmptyPage/>)
       },
+      */
       {
         label:'Settings',
         key:'settings',
         children:(<SettingsForm ref={settingsFormRef} initialValues={globalSettings} sendDataToParent={sendUpdatedSettingsToBackend} />)
+      },
+      {
+        label:'About',
+        key:'about',
+        children:(<About/>)
       }
     ]);
   }

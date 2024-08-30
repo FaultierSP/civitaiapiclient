@@ -1,3 +1,7 @@
+## [0.0.5] - 30.08.2024
+- Changed the HTTP client from Axios to Tauri's own (issue #7).
+- Changed the location of the configuration file to apps own folder (issue #5).
+
 ## [0.0.4] - 18.08.2024
 - Changed the way serializer handles missing fields (issue #4).
 - Small tweaks.

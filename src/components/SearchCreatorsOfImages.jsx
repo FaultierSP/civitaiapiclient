@@ -23,8 +23,6 @@ const SearchCreatorsOfImages = (props) => {
     };
 
     function getFirstBatchOfImages() {
-        //console.clear();
-
         setAwaitingAPIResponse(true);
         setResultVisible(false);
 
@@ -43,6 +41,27 @@ const SearchCreatorsOfImages = (props) => {
             headers: api_config,
         })
         .then((response) => {
+            if(response.status !== 200) {
+                if (typeof response.data.error === 'object') {
+                    let error_message = "";
+
+                    Object.entries(response.data.error.issues).forEach(([key, value]) => {
+                        error_message += value.message + "\n";
+                    });
+
+                    setResultTitle(error_message);
+                } else {
+                    setResultTitle(response.data.error);
+                }
+                
+                setResultSubTitle(null);
+                setResultStatus("warning");
+                setResultButtons(null);
+                setResultVisible(true);
+
+                return;
+            }
+
             if(response.data.items.length == 0 ) {
                 setResultTitle("Couldn't find any images by this creator.");
                 setResultSubTitle(null);
@@ -72,12 +91,12 @@ const SearchCreatorsOfImages = (props) => {
         .catch((error) => {
             setResultTitle(error.message);
             
-            if(error.response.data.error) {
+            /*if(error.response && error.response.data && error.response.data.error) {
                 setResultSubTitle(error.response.data.error);
             }
             else {
                 setResultSubTitle(null);
-            }
+            }*/
 
             setResultStatus("error");
             setResultButtons(null);

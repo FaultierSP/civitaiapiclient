@@ -204,9 +204,6 @@ const Images = (props) => {
             }            
         }
 
-        console.log(api_config);
-        console.log(data);
-
         fetch('https://civitai.com'+api_prefix+'images',{
             method:'GET',
             query:data,
@@ -214,6 +211,11 @@ const Images = (props) => {
             headers:api_config
         })
             .then((response) => {
+                if (response.data.items.length==0) {
+                    props.showErrorMessage("No images found.");
+                    return;
+                }
+
                 if (response.data.metadata.nextPage) {
                     setLoadMoreAPIURL(response.data.metadata.nextPage);
                     setLoadMoreButtonDisabled(false);
@@ -221,13 +223,14 @@ const Images = (props) => {
                 else {
                     setLoadMoreButtonDisabled(true);
                 }
+
                 setImagesTableData(response.data.items);
                 setDownloadButtonDisabled(true);
                 //setSelectedRowKeys([]);
             })
             .catch((error) => {
                 if(typeof error!=undefined) {
-                    props.showErrorMessage(error.response.data.error);
+                    //props.showErrorMessage(error);
                 }
             })
             .finally(()=>{
